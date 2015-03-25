@@ -1,0 +1,176 @@
+<!doctype html>
+<html>
+    <head>
+
+    </head>
+    <body>
+        hello
+
+        <pre id="land" style="position: absolute; width: 150px; height: 150px;"></pre>
+        <pre id="creatures" style="position: absolute; width: 150px; height: 150px;"></pre>
+<script>
+        function World(land_matrix,creatures_matrix){
+            this.land = land_matrix;
+            this.creatures = creatures_matrix;
+
+            this.update = function(){
+                var acted = [];
+                this.creatures.forEach(function(row,row_index){
+                    row.forEach(function(creature,creature_index){
+                        if(creature && acted.indexOf(creature) == -1){
+                            var view = {
+                                left:land_matrix[row_index][creature_index-1],
+                                right:land_matrix[row_index][creature_index+1]
+                            }
+                            var act = creature.act(view);
+                            if(act.act == 'move'){
+                                if(act.param == 'right'){
+                                    var creature = creatures_matrix[row_index][creature_index];
+                                    creatures_matrix[row_index][creature_index] = undefined;
+                                    creatures_matrix[row_index][creature_index+1] = creature;
+                                }
+                                if(act.param == 'left'){
+                                    var creature = creatures_matrix[row_index][creature_index];
+                                    creatures_matrix[row_index][creature_index] = undefined;
+                                    creatures_matrix[row_index][creature_index-1] = creature;
+                                }
+                            }
+                            acted.push(creature)
+                        }
+                    })
+                })
+            }
+        }
+
+        var land =
+           ['**********',
+            '*        *',
+            '*        *',
+            '*        *',
+            '*        *',
+            '*        *',
+            '*        *',
+            '*        *',
+            '*        *',
+            '**********']
+
+        function Land(type){
+            this.type = type;
+        }
+
+        var lands_types = {
+            '*':function (){return new Land('rocks')},
+            ' ':function (){return new Land('ground')}
+        }
+        var lands_chars = {
+            'rocks':'@',
+            'ground':' '
+        }
+
+        function array_to_land(array,types){
+            var array_matrix = [];
+            array.forEach(function(string){
+                var array_row = [];
+                for(var i = 0; i < string.length; i++){
+                    array_row.push(types[string[i]]())
+                }
+                array_matrix.push(array_row);
+            })
+            return array_matrix;
+        }
+
+        function print_world_ascii(world){
+            world.land.forEach(function(row){
+                row.forEach(function(land){
+                    document.getElementById('land').innerText += (lands_chars[land.type])
+                })
+                document.getElementById('land').innerText += '\n';
+            })
+        }
+
+
+        function Creature(){
+            this.type = 'simple';
+            this.dir = 'right';
+            var self = this;
+            this.act = function(view){
+                if(dir = 'right') {
+                    if (view.right && view.right.type != 'rocks') {
+                        return {act: 'move', param: 'right'}
+                    } else if (view.left && view.left.type != 'rocks') {
+                        self.dir = 'left';
+                        return {act: 'move', param: 'left'}
+                    } else {
+                        return {act: 'sleep'}
+                    }
+                }else{
+                    if (view.left && view.left.type != 'rocks') {
+                        return {act: 'move', param: 'left'}
+                    } else if (view.right && view.right.type != 'rocks') {
+                        self.dir = 'right';
+                        return {act: 'move', param: 'right'}
+                    } else {
+                        return {act: 'sleep'}
+                    }
+                }
+            }
+        }
+
+        var creatures =
+                   ['          ',
+                    '          ',
+                    '          ',
+                    '        * ',
+                    '          ',
+                    '          ',
+                    '          ',
+                    ' *        ',
+                    '          ',
+                    '          ']
+
+        var creatures_types = {
+            '*':function (){return new Creature()},
+            ' ':function (){return;}
+        }
+        var creatures_chars = {
+            'simple':'X'
+        }
+
+        function array_to_creatures(array,types){
+            var array_matrix = [];
+            array.forEach(function(string){
+                var array_row = [];
+                for(var i = 0; i < string.length; i++){
+                    array_row.push(types[string[i]]())
+                }
+                array_matrix.push(array_row);
+            })
+            return array_matrix;
+        }
+
+        var world = new World(array_to_land(land,lands_types),array_to_creatures(creatures,creatures_types));
+        print_world_ascii(world);
+
+        function print_creatures_ascii(world){
+            world.creatures.forEach(function(row){
+                row.forEach(function(land){
+                    if(land){
+                        document.getElementById('creatures').innerText += (creatures_chars[land.type])
+                    }else{
+                        document.getElementById('creatures').innerText += ' ';
+                    }
+                })
+                document.getElementById('creatures').innerText += '\n';
+            })
+        }
+
+        setInterval(function(){
+            console.log('tick')
+            world.update();
+            document.getElementById('creatures').innerText = '';
+            print_creatures_ascii(world);
+        },1000)
+    </script>
+
+    </body>
+</html>
