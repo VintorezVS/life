@@ -1,4 +1,4 @@
-var plan = ["############################",
+/*var plan = ["############################",
     "#      #    #      o      ##",
     "#                          #",
     "#          #####           #",
@@ -9,7 +9,7 @@ var plan = ["############################",
     "#   ##       o             #",
     "# o  #         o       ### #",
     "#    #                     #",
-    "############################"];
+    "############################"];*/
 
 function Vector(x, y) {
     this.x = x;
@@ -124,7 +124,7 @@ World.prototype.toString = function () {
 
 function Wall() {
 }
-
+/*
 var world = new World(plan, {
     "#": Wall,
     "o": BouncingCritter
@@ -139,7 +139,7 @@ var world = new World(plan, {
 //   #   ##       o             #
 //   # o  #         o       ### #
 //   #    #                     #
-//   ############################
+//   ############################*/
 
 Grid.prototype.forEach = function (f, context) {
     for (var y = 0; y < this.height; y++) {
@@ -358,26 +358,36 @@ PlantEater.prototype.act = function (context) {
     //return {type: "eat", direction: plant};
 };
 
-var simv=["#","O","#","#","#","#","#","O","O"," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "];
 
-function getRandomArbitrary(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+var prioritetindex=[0.1,0.96,1];		//значение приоритета
+function prioritet(arr,num){			//приоритет рандома того или иного символа в массиве simv
+var max=num;							//arr-массив simv; mun-рандомное число от 0 до 1
+for (var i=0;i<arr.length;i++){			//значение имеет разница между левым и правым числом, например
+    if (arr[i]>=max)					//рандомное число 0,25-max, идет проверка 0,1>0,25?, нет 0,25-max,
+    {max=arr[i]							//0,96>0.25?, да 0,96-max, 
+    return i;							//возвращает индекс max, для данного примера индекс=1
+    }									//в случае если в prioritetindex все чила<max, возвращает индекс 
+    if (max>=arr[arr.length-1]){max=arr[arr.length-1]} //последнего элемента
+}}
 
-function newarray(one,leng){
-    var map=[];
-    for(var i=0;i<one;i++){
-        map[i]=[];
-        for(var j=0;j<leng;j++){
-            if(i==0||i==one-1||j==0||j==leng-1){
-                map[i]+="#";}
-            //else if (i==2&&j==2||i==10&&j==8||i==30&&j==20||i==40&&j==50||i==40&&j==40||i==32&&j==21){map[i]+="O"}
-            else map[i]+=simv[getRandomArbitrary(0,simv.length-1)];
-        };
+var simv=["#"," ","O"];					//символы из которых составляется карта
+function newarray(one,leng){			//one,leng-высота и ширина карты
+var map=[];
+for(var i=0;i<one;i++){
+    map[i]=[];
+    for(var j=0;j<leng;j++){  
+        if(i==0||i==one-1||j==0||j==leng-1){	//рисует стену вокруг карты
+            map[i]+="#";}
+		else if(map[i-1][j]=="#"||map[i][j-1]=="#"){
+           map[i]+=simv[prioritet([0.3,0.9,1],Math.random())]
+        }
+		else map[i]+=simv[prioritet(prioritetindex,Math.random())];	//рисует рандомный (в зависимости от приоритета) символ из simv 
     };
+};  
     return map;
 };
-var mas1=newarray(47,197);
+
+var mas1=newarray(20,30);			//создает карту(масив масивов) заданой величины
 var valley = new LifelikeWorld(
     mas1,
     {"#": Wall,
